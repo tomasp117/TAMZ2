@@ -2,8 +2,11 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Item"
-        android:id="@+id/menu_item1"/>
-    <item android:title="Item" />
-    <item android:title="Item" />
+    <item
+        android:id="@+id/chart_type"
+        android:title="Chart type" />
+    <item android:id="@+id/history"
+        android:title="History" />
+    <item android:id="@+id/settings"
+        android:title="Settings" />
 </menu>
