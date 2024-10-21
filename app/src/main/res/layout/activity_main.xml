@@ -65,6 +65,7 @@
             android:id="@+id/barChart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+
             />
     </androidx.cardview.widget.CardView>
 
@@ -106,8 +107,8 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:max="500"
-                android:thumbTint="@android:color/holo_blue_light"
-                android:progressTint="@android:color/holo_blue_light"
+                android:thumbTint="@color/main_color"
+                android:progressTint="@color/main_color"
                 android:progressBackgroundTint="@android:color/darker_gray"/>
 
             <TextView
@@ -125,8 +126,8 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:max="100"
-                android:thumbTint="@android:color/holo_blue_light"
-                android:progressTint="@android:color/holo_blue_light"
+                android:thumbTint="@color/main_color"
+                android:progressTint="@color/main_color"
                 android:progressBackgroundTint="@android:color/darker_gray"/>
 
             <TextView
@@ -144,8 +145,8 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:max="10"
-                android:thumbTint="@android:color/holo_blue_light"
-                android:progressTint="@android:color/holo_blue_light"
+                android:thumbTint="@color/main_color"
+                android:progressTint="@color/main_color"
                 android:progressBackgroundTint="@android:color/darker_gray"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

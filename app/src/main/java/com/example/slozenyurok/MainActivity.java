@@ -1,11 +1,17 @@
 package com.example.slozenyurok;
 
+import android.graphics.ColorSpace;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.TooltipCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -28,13 +34,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
 
         depositSlider = findViewById(R.id.depositSlider);
         interestSlider = findViewById(R.id.interestSlider);
@@ -64,16 +66,17 @@ public class MainActivity extends AppCompatActivity {
                 int depositValue = progress * 1000; // např. pokud chcete tisícové hodnoty
                 depositTextView.setText("Vklad: " + depositValue); // Změní hodnotu textu
                 updateResults(depositValue, interestSlider.getProgress(), periodSlider.getProgress(), savingsResult, interestResult);
+                TooltipCompat.setTooltipText(seekBar, String.valueOf(progress));
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Volá se, když uživatel začne interakci s posuvníkem
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // Volá se, když uživatel přestane interagovat s posuvníkem
+
             }
         });
         interestSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -85,12 +88,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Do something here if needed
+                
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // Do something here if needed
+                
             }
         });
 
@@ -104,12 +107,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Do something here if needed
+                
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // Do something here if needed
+                
             }
         });
 
@@ -117,25 +120,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateResults(int deposit, int interestProgress, int period, TextView savingsResult, TextView interestResult) {
-        // Pokud jsou všechny hodnoty nula, nezobrazovat nic
-
-
-        if (deposit == 0 || interestProgress == 0 || period == 0) {
+       /* if (deposit == 0 || interestProgress == 0 || period == 0) {
             savingsResult.setText("Naspořená částka: 0");
             interestResult.setText("Z toho úroky: 0");// Interest bar
             return;
-        }
-
-        // Úroková sazba jako procento (z posuvníku 0-50, převádíme na hodnotu 0.0-0.5)
+        }*/
+        
         double interestRate = (float) interestProgress / 10;
-
-        // Vzorec pro výpočet naspořené částky
+        
         double finalAmount = deposit * Math.pow(1 + (interestRate / 100), period);
-
-        // Výpočet celkového úroku
+        
         double totalInterest = finalAmount - deposit;
-
-        // Zobrazení výsledků
+        
         savingsResult.setText(String.format("Naspořená částka: %.0f", finalAmount));
         interestResult.setText(String.format("Z toho úroky: %.0f", totalInterest));
 
@@ -144,11 +140,18 @@ public class MainActivity extends AppCompatActivity {
         entries.add(new BarEntry(1, (float) totalInterest)); // Interest bar
 
         BarDataSet dataSet = new BarDataSet(entries, "Vklad/Úroky");
+        dataSet.setColors(new int[] {
+                getResources().getColor(R.color.main_color), // Barva pro vklad
+                getResources().getColor(R.color.secondary_color) // Barva pro úrok
+        });
         BarData data = new BarData(dataSet);
+
         barChart.setData(data);
         barChart.invalidate();
         barChart.getAxisLeft().setAxisMinimum(0); // Nastavení minimální hodnoty Y osy na 0
         barChart.getAxisRight().setAxisMinimum(0); // Nastavení minimální hodnoty Y osy na 0 (pokud je pravá osa aktivní)
+
+
 
         // Vypnutí mřížky
         barChart.getAxisLeft().setDrawGridLines(false);
@@ -161,10 +164,19 @@ public class MainActivity extends AppCompatActivity {
         barChart.getAxisRight().setAxisMinimum(0);
         barChart.setExtraOffsets(0, 0, 0, 5);
 
+        dataSet.setLabel("");
         // Nastavení pozice hodnot nad sloupci
         dataSet.setDrawValues(true);
         barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
 
 
 
