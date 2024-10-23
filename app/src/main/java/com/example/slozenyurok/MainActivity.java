@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private BarChart barChart;
     private PieChart pieChart;
-
+    private double totalInterest = 0;
     ActivityResultLauncher<Intent> chartTypeLauncher;
 
     @Override
@@ -61,8 +61,10 @@ public class MainActivity extends AppCompatActivity {
 
                             // Podle typu grafu aktualizuj graf
                             if ("bar".equals(chartType)) {
+                                updateBarChart(data.getIntExtra("deposit", 0), data.getDoubleExtra("totalInterest", 0.0));
                                 showBarChart();
                             } else if ("pie".equals(chartType)) {
+                                updatePieChart(data.getIntExtra("deposit", 0), data.getDoubleExtra("totalInterest", 0.0));
                                 showPieChart();
                             }
                         }
@@ -208,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         // Calculate final amount and interest
         double interestRate = (float) interestProgress / 10;
         double finalAmount = calculateFinalAmount(deposit, interestRate, period);
-        double totalInterest = finalAmount - deposit;
+        totalInterest = finalAmount - deposit;
 
         // Update the result text views
         savingsResult.setText(String.format("Naspořená částka: %.0f", finalAmount));
@@ -298,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
         pieChart.setDrawHoleEnabled(true); // Enable hole
         pieChart.setHoleRadius(30f); // Radius of the hole
         pieChart.setTransparentCircleRadius(35f); // Transparency of the hole
-        pieChart.setUsePercentValues(true); // Use percentage values
+        //pieChart.setUsePercentValues(true); // Use percentage values
         pieChart.getDescription().setEnabled(false); // Disable chart description
     }
 
@@ -329,6 +331,11 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("deposit", depositSlider.getProgress() * 1000);
             intent.putExtra("totalInterest", totalInterest);
             chartTypeLauncher.launch(intent);
+            return true;
+        }
+        if (item.getItemId() == R.id.settings) {
+            Intent intent = new Intent(MainActivity.this, Settings.class);
+            startActivity(intent);
             return true;
         }
         return false;

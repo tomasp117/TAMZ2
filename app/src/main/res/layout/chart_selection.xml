@@ -24,7 +24,7 @@
         app:layout_constraintBottom_toTopOf="@id/cardPieChart"
         app:layout_constraintHeight_default="spread">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -38,8 +38,15 @@
                 android:layout_height="match_parent"
                 android:contentDescription="Náhled sloupcového grafu"
                 app:layout_constraintHeight_default="spread" />
+            <View
+                android:id="@+id/barChartOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true" />
 
-        </LinearLayout>
+        </FrameLayout>
     </androidx.cardview.widget.CardView>
 
     <!-- Karta pro koláčový graf (PieChart) -->
@@ -59,7 +66,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintHeight_default="spread">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -73,7 +80,15 @@
                 android:contentDescription="Náhled koláčového grafu"
                 app:layout_constraintHeight_default="spread" />
 
-        </LinearLayout>
+            <View
+                android:id="@+id/pieChartOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </FrameLayout>
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

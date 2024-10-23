@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">SlozenyUrok</string>
+    <string-array name="colors_array">
+        <item>Modrá</item>
+        <item>Červená</item>
+        <item>Zelená</item>
+        <item>Fialová</item>
+        <item>Oranžová</item>
+    </string-array>
 </resources>
