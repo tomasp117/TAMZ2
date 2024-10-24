@@ -18,6 +18,9 @@
         <activity
             android:name=".Settings"
             android:exported="false" />
+        <activity
+            android:name=".Settings2"
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"

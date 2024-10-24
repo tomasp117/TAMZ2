@@ -2,9 +2,13 @@ package com.example.slozenyurok;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.TooltipCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -43,12 +48,21 @@ public class MainActivity extends AppCompatActivity {
     private PieChart pieChart;
     private double totalInterest = 0;
     ActivityResultLauncher<Intent> chartTypeLauncher;
+    ActivityResultLauncher<Intent> settingsLauncher;
+
+    // Define your color variables
+    private int primaryColor;
+    private int secondaryColor;
+    private int menuColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Load colors from SharedPreferences
+        loadColorsFromPreferences();
 
         chartTypeLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -72,10 +86,40 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+        settingsLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            primaryColor = data.getIntExtra("primary_color", primaryColor);
+                            secondaryColor = data.getIntExtra("secondary_color", secondaryColor);
+                            //menuColor = data.getIntExtra("menu_color", menuColor);
+                            depositSlider.setProgressTintList(ColorStateList.valueOf(primaryColor));
+                            depositSlider.setThumbTintList(ColorStateList.valueOf(primaryColor));
+                            interestSlider.setProgressTintList(ColorStateList.valueOf(primaryColor));
+                            interestSlider.setThumbTintList(ColorStateList.valueOf(primaryColor));
+                            periodSlider.setProgressTintList(ColorStateList.valueOf(primaryColor));
+                            periodSlider.setThumbTintList(ColorStateList.valueOf(primaryColor));
+                            saveColorsToPreferences();
+                            // Optionally, update the charts to reflect the new colors
+                            updateBarChart(depositSlider.getProgress() * 1000, totalInterest);
+                            updatePieChart(depositSlider.getProgress() * 1000, totalInterest);
+                        }
+                    }
+                }
+        );
+
 
         depositSlider = findViewById(R.id.depositSlider);
+        depositSlider.setProgressTintList(ColorStateList.valueOf(primaryColor));
+        depositSlider.setThumbTintList(ColorStateList.valueOf(primaryColor));
         interestSlider = findViewById(R.id.interestSlider);
+        interestSlider.setProgressTintList(ColorStateList.valueOf(primaryColor));
+        interestSlider.setThumbTintList(ColorStateList.valueOf(primaryColor));
         periodSlider = findViewById(R.id.periodSlider);
+        periodSlider.setProgressTintList(ColorStateList.valueOf(primaryColor));
+        periodSlider.setThumbTintList(ColorStateList.valueOf(primaryColor));
 
         depositTextView = findViewById(R.id.depositText); // TextView pro Vklad
         interestTextView = findViewById(R.id.interestText); // TextView pro Úrok
@@ -155,56 +199,21 @@ public class MainActivity extends AppCompatActivity {
     showBarChart();
     }
 
-    /*private void updateResults(int deposit, int interestProgress, int period, TextView savingsResult, TextView interestResult) {
-       /* if (deposit == 0 || interestProgress == 0 || period == 0) {
-            savingsResult.setText("Naspořená částka: 0");
-            interestResult.setText("Z toho úroky: 0");// Interest bar
-            return;
-        //}
-        
-        double interestRate = (float) interestProgress / 10;
-        
-        double finalAmount = deposit * Math.pow(1 + (interestRate / 100), period);
-        
-        double totalInterest = finalAmount - deposit;
-        
-        savingsResult.setText(String.format("Naspořená částka: %.0f", finalAmount));
-        interestResult.setText(String.format("Z toho úroky: %.0f", totalInterest));
+    private void saveColorsToPreferences() {
+        SharedPreferences preferences = getSharedPreferences("app_settings", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("primary_color", primaryColor);
+        editor.putInt("secondary_color", secondaryColor);
+        //editor.putInt("menu_color", menuColor);
+        editor.apply();
+    }
 
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0, (float) deposit));  // Deposit bar
-        entries.add(new BarEntry(1, (float) totalInterest)); // Interest bar
+    private void loadColorsFromPreferences() {
+        SharedPreferences preferences = getSharedPreferences("app_settings", MODE_PRIVATE);
+        primaryColor = preferences.getInt("primary_color", getResources().getColor(R.color.main_color)); // Default color
+        secondaryColor = preferences.getInt("secondary_color", getResources().getColor(R.color.secondary_color)); // Default color
+    }
 
-        BarDataSet dataSet = new BarDataSet(entries, "Vklad/Úroky");
-        dataSet.setColors(new int[] {
-                getResources().getColor(R.color.main_color), // Barva pro vklad
-                getResources().getColor(R.color.secondary_color) // Barva pro úrok
-        });
-        BarData data = new BarData(dataSet);
-
-        barChart.setData(data);
-        barChart.invalidate();
-        barChart.getAxisLeft().setAxisMinimum(0); // Nastavení minimální hodnoty Y osy na 0
-        barChart.getAxisRight().setAxisMinimum(0); // Nastavení minimální hodnoty Y osy na 0 (pokud je pravá osa aktivní)
-
-
-
-        // Vypnutí mřížky
-        barChart.getAxisLeft().setDrawGridLines(false);
-        barChart.getAxisRight().setDrawGridLines(false);
-        barChart.getXAxis().setDrawGridLines(false);
-        dataSet.setValueTextSize(16f);
-
-        // Zajištění, že Y osa začíná na 0 a žádné mřížky
-        barChart.getAxisLeft().setAxisMinimum(0);
-        barChart.getAxisRight().setAxisMinimum(0);
-        barChart.setExtraOffsets(0, 0, 0, 5);
-
-        dataSet.setLabel("");
-        // Nastavení pozice hodnot nad sloupci
-        dataSet.setDrawValues(true);
-        barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-    }*/
 
     private void updateResults(int deposit, int interestProgress, int period, TextView savingsResult, TextView interestResult) {
         // Calculate final amount and interest
@@ -235,10 +244,7 @@ public class MainActivity extends AppCompatActivity {
         entries.add(new BarEntry(1, (float) totalInterest)); // Interest bar
 
         BarDataSet dataSet = new BarDataSet(entries, "Vklad/Úroky");
-        dataSet.setColors(new int[] {
-                getResources().getColor(R.color.main_color), // Barva pro vklad
-                getResources().getColor(R.color.secondary_color) // Barva pro úrok
-        });
+        dataSet.setColors(new int[]{primaryColor, secondaryColor});
         BarData data = new BarData(dataSet);
 
         // Set data for the chart
@@ -259,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
         barChart.getAxisRight().setDrawGridLines(false);
         barChart.getXAxis().setDrawGridLines(false);
 
+
         // Set the value text size for the bars
         barChart.getData().getDataSetByIndex(0).setValueTextSize(16f);
 
@@ -270,8 +277,11 @@ public class MainActivity extends AppCompatActivity {
         dataSet.setLabel("");
         dataSet.setDrawValues(true);
 
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setDrawLabels(false);
+
         // Position the X-axis labels at the bottom
-        barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        //barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
     }
 
     private void updatePieChart(int deposit, double totalInterest) {
@@ -282,10 +292,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Create PieDataSet
         PieDataSet dataSet = new PieDataSet(entries, "Vklad/Úroky");
-        dataSet.setColors(new int[] {
-                getResources().getColor(R.color.main_color), // Vklad barva
-                getResources().getColor(R.color.secondary_color) // Úroky barva
-        });
+        dataSet.setColors(new int[]{primaryColor, secondaryColor});
 
         // Create PieData
         PieData data = new PieData(dataSet);
@@ -321,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+
         return true;
     }
 
@@ -334,7 +342,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         if (item.getItemId() == R.id.settings) {
-            Intent intent = new Intent(MainActivity.this, Settings.class);
+            Intent intent = new Intent(MainActivity.this, Settings2.class);
+            intent.putExtra("primary_color", primaryColor);
+            intent.putExtra("secondary_color", secondaryColor);
+            //intent.putExtra("menu_color", menuColor);
+            settingsLauncher.launch(intent);
             startActivity(intent);
             return true;
         }

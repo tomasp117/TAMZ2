@@ -20,6 +20,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
+x_github-com_quadflask_colorpicker = { module = "https://github.com/QuadFlask/colorpicker" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

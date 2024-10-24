@@ -1,32 +1,33 @@
 package com.example.slozenyurok;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.Spinner;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import top.defaults.colorpicker.ColorPickerPopup;
+import com.skydoves.colorpickerview.ColorEnvelope;
+import com.skydoves.colorpickerview.ColorPickerDialog;
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener;
 
 public class Settings extends AppCompatActivity{
+    private EditText minRangeEditText;
     private EditText maxRangeEditText;
+    private EditText minInterestEditText;
     private EditText maxInterestEditText;
+    private EditText minPeriodEditText;
     private EditText maxPeriodEditText;
-    private View colorPreview; // Změna na View pro náhled barvy
+    private TextView colorPreview; // Změna na View pro náhled barvy
     private Button pickColorButton;
-    private int defaultColor = Color.RED; // Výchozí barva
+    private int defaultColor = R.color.main_color; // Výchozí barva
     private SharedPreferences sharedPreferences;
 
     @Override
@@ -37,10 +38,13 @@ public class Settings extends AppCompatActivity{
         sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
 
         // Inicializace UI komponent
+        minRangeEditText = findViewById(R.id.minRangeEditText);
         maxRangeEditText = findViewById(R.id.maxRangeEditText);
+        minInterestEditText = findViewById(R.id.minInterestEditText);
         maxInterestEditText = findViewById(R.id.maxInterestEditText);
+        minPeriodEditText = findViewById(R.id.minPeriodEditText);
         maxPeriodEditText = findViewById(R.id.maxPeriodEditText);
-        colorPreview = findViewById(R.id.preview_selected_color); // Opraveno na správné ID
+        colorPreview = findViewById(R.id.colorPreview);
         pickColorButton = findViewById(R.id.pickColorButton);
 
         // Načtení nastavení
@@ -50,23 +54,20 @@ public class Settings extends AppCompatActivity{
         pickColorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                new ColorPickerPopup.Builder(Settings.this)
-                        .initialColor(defaultColor) // Set the initial color
-                        .enableBrightness(true) // Allow adjusting brightness
-                        .enableAlpha(true) // Allow adjusting alpha (transparency)
-                        .okTitle("Choose") // Confirm button title
-                        .cancelTitle("Cancel") // Cancel button title
-                        .showIndicator(true) // Show color indicator
-                        .showValue(true) // Show hex color value
-                        .build()
-                        .show(v, new ColorPickerPopup.ColorPickerObserver() {
+                ColorPickerDialog.Builder builder = new ColorPickerDialog.Builder(Settings.this)
+                        .setTitle("Vyber barvu")
+                        .setPreferenceName("MyColorPickerDialog")
+                        .setPositiveButton("Vybrat", new ColorEnvelopeListener() {
+                            @SuppressLint("ResourceAsColor")
                             @Override
-                            public void onColorPicked(int color) {
-                                Log.d("Settings", "Color picked: " + color);
-                                defaultColor = color; // Update selected color
-                                colorPreview.setBackgroundColor(defaultColor); // Update color preview
+                            public void onColorSelected(ColorEnvelope envelope, boolean fromUser) {
+                                defaultColor = envelope.getColor(); // Uložení vybrané barvy
+                                colorPreview.setBackgroundColor(defaultColor); // Aktualizace náhledu barvy
                             }
-                        });
+                        })
+                        .setNegativeButton("Zrušit", (dialogInterface, i) -> dialogInterface.dismiss());
+
+                builder.show(); // Zobrazení dialogu
             }
         });
 
@@ -80,15 +81,9 @@ public class Settings extends AppCompatActivity{
         });
     }
 
+    @SuppressLint("ResourceAsColor")
     private void loadSettings() {
-        String maxRange = sharedPreferences.getString("maxRange", "100");
-        String maxInterest = sharedPreferences.getString("maxInterest", "5");
-        String maxPeriod = sharedPreferences.getString("maxPeriod", "12");
-        defaultColor = sharedPreferences.getInt("chartColor", Color.RED);
-
-        maxRangeEditText.setText(maxRange);
-        maxInterestEditText.setText(maxInterest);
-        maxPeriodEditText.setText(maxPeriod);
+        defaultColor = sharedPreferences.getInt("chartColor", R.color.main_color);
         colorPreview.setBackgroundColor(defaultColor); // Aktualizuj náhled barvy
     }
 

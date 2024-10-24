@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="secondary_color">#00ffff</color>
     <color name="main_color">#00bfff</color>
+    <color name="menu_color">#00bfff</color>
 </resources>
